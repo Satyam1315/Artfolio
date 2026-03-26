@@ -32,15 +32,14 @@ router.put("/profile", authenticate, async (req, res) => {
       isAvailableForWork,
     } = req.body;
 
-    const updateData = {
-      name,
-      bio,
-      skills,
-      socialLinks,
-      location,
-      profession,
-      isAvailableForWork,
-    };
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (bio !== undefined) updateData.bio = bio;
+    if (skills !== undefined) updateData.skills = skills;
+    if (socialLinks !== undefined) updateData.socialLinks = socialLinks;
+    if (location !== undefined) updateData.location = location;
+    if (profession !== undefined) updateData.profession = profession;
+    if (isAvailableForWork !== undefined) updateData.isAvailableForWork = isAvailableForWork;
 
     const user = await User.findByIdAndUpdate(req.userId, updateData, {
       new: true,

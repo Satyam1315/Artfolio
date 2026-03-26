@@ -33,6 +33,7 @@ const EditProject = () => {
   const [existingImages, setExistingImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
   const [newPreviewUrls, setNewPreviewUrls] = useState([]);
+  const [thumbnailIndex, setThumbnailIndex] = useState(0);
 
   useEffect(() => {
     fetchProject();
@@ -57,6 +58,7 @@ const EditProject = () => {
       });
 
       setExistingImages(project.images || []);
+      setThumbnailIndex(project.thumbnailIndex || 0);
     } catch (error) {
       console.error("Error fetching project:", error);
       setError("Failed to load project");
@@ -97,10 +99,31 @@ const EditProject = () => {
   };
 
   const removeExistingImage = (index) => {
+    const totalImages = existingImages.length + newImages.length;
+    
+    // If removing the thumbnail image, reset to first image
+    if (index === thumbnailIndex && totalImages > 1) {
+      setThumbnailIndex(0);
+    } else if (index < thumbnailIndex) {
+      // If removing an image before the thumbnail, adjust the index
+      setThumbnailIndex(thumbnailIndex - 1);
+    }
+    
     setExistingImages(existingImages.filter((_, i) => i !== index));
   };
 
   const removeNewImage = (index) => {
+    const newImageIndex = existingImages.length + index;
+    const totalImages = existingImages.length + newImages.length;
+    
+    // If removing the thumbnail image, reset to first image
+    if (newImageIndex === thumbnailIndex && totalImages > 1) {
+      setThumbnailIndex(0);
+    } else if (newImageIndex < thumbnailIndex) {
+      // If removing an image before the thumbnail, adjust the index
+      setThumbnailIndex(thumbnailIndex - 1);
+    }
+    
     setNewImages(newImages.filter((_, i) => i !== index));
     setNewPreviewUrls(newPreviewUrls.filter((_, i) => i !== index));
   };
@@ -134,6 +157,7 @@ const EditProject = () => {
       formDataToSend.append("client", formData.client);
       formDataToSend.append("completionDate", formData.completionDate);
       formDataToSend.append("isFeatured", formData.isFeatured);
+      formDataToSend.append("thumbnailIndex", thumbnailIndex);
       formDataToSend.append("existingImages", JSON.stringify(existingImages));
 
       newImages.forEach((image) => {
@@ -189,6 +213,9 @@ const EditProject = () => {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Project Images (Max 10, 10MB each) *
             </label>
+            <p className="text-sm text-gray-500 mb-3">
+              Select one image as thumbnail by clicking the circle below it
+            </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {/* Existing Images */}
@@ -202,6 +229,11 @@ const EditProject = () => {
                     alt={`Existing ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
+                  {thumbnailIndex === index && (
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-blue-600 text-white text-xs rounded font-medium">
+                      Thumbnail
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={() => removeExistingImage(index)}
@@ -209,32 +241,58 @@ const EditProject = () => {
                   >
                     <X className="w-4 h-4" />
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setThumbnailIndex(index)}
+                    className="absolute bottom-2 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full border-2 border-white bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-colors flex items-center justify-center"
+                  >
+                    {thumbnailIndex === index && (
+                      <div className="w-3 h-3 rounded-full bg-blue-600" />
+                    )}
+                  </button>
                 </div>
               ))}
 
               {/* New Images */}
-              {newPreviewUrls.map((url, index) => (
-                <div
-                  key={`new-${index}`}
-                  className="relative aspect-square rounded-lg overflow-hidden group"
-                >
-                  <img
-                    src={url}
-                    alt={`New ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-2 left-2 px-2 py-1 bg-green-600 text-white text-xs rounded">
-                    New
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeNewImage(index)}
-                    className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              {newPreviewUrls.map((url, index) => {
+                const imageIndex = existingImages.length + index;
+                return (
+                  <div
+                    key={`new-${index}`}
+                    className="relative aspect-square rounded-lg overflow-hidden group"
                   >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+                    <img
+                      src={url}
+                      alt={`New ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-green-600 text-white text-xs rounded font-medium">
+                      New
+                    </div>
+                    {thumbnailIndex === imageIndex && (
+                      <div className="absolute top-2 right-14 px-2 py-1 bg-blue-600 text-white text-xs rounded font-medium">
+                        Thumbnail
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeNewImage(index)}
+                      className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setThumbnailIndex(imageIndex)}
+                      className="absolute bottom-2 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full border-2 border-white bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-colors flex items-center justify-center"
+                    >
+                      {thumbnailIndex === imageIndex && (
+                        <div className="w-3 h-3 rounded-full bg-blue-600" />
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
 
               {existingImages.length + newImages.length < 10 && (
                 <label className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gray-900 transition-colors">

@@ -1,19 +1,27 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { projectAPI } from "../utils/api";
+import { projectAPI, userAPI } from "../utils/api";
 import { Plus, Edit, Trash2, ExternalLink, Share2, Check, Copy } from "lucide-react";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, checkAuth } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [togglingWork, setTogglingWork] = useState(false);
+  const [isAvailable, setIsAvailable] = useState(false);
 
   useEffect(() => {
     fetchProjects();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      setIsAvailable(user.isAvailableForWork || false);
+    }
+  }, [user]);
 
   const fetchProjects = async () => {
     try {
@@ -60,6 +68,27 @@ const Dashboard = () => {
     }
   };
 
+  const handleToggleAvailability = async () => {
+    if (togglingWork) return;
+    
+    const newValue = !isAvailable;
+    setIsAvailable(newValue); // Optimistic update
+    
+    try {
+      setTogglingWork(true);
+      await userAPI.updateProfile({
+        isAvailableForWork: newValue,
+      });
+      await checkAuth();
+    } catch (error) {
+      console.error("Error toggling availability:", error);
+      alert("Failed to update availability status");
+      setIsAvailable(!newValue); // Revert on error
+    } finally {
+      setTogglingWork(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen pt-24 flex items-center justify-center">
@@ -76,6 +105,22 @@ const Dashboard = () => {
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
             <p className="text-gray-600">Welcome back, {user?.name}!</p>
+            <div 
+              onClick={handleToggleAvailability}
+              className={`mt-3 flex items-center gap-3 cursor-pointer select-none ${togglingWork ? 'pointer-events-none' : ''}`}
+            >
+              <div className="relative">
+                <div className={`block h-8 w-14 rounded-full transition-colors ${
+                  isAvailable ? 'bg-green-500' : 'bg-gray-300'
+                }`}></div>
+                <div className={`absolute left-1 top-1 h-6 w-6 rounded-full bg-white shadow transition-transform duration-200 ${
+                  isAvailable ? 'translate-x-6' : ''
+                } ${togglingWork ? 'opacity-50' : ''}`}></div>
+              </div>
+              <span className="text-sm font-medium text-gray-700">
+                Available for work
+              </span>
+            </div>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link

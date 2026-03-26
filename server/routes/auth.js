@@ -114,11 +114,12 @@ router.get("/me", async (req, res) => {
         email: user.email,
         bio: user.bio,
         location: user.location,
-        occupation: user.occupation,
+        profession: user.profession,
         website: user.website,
         socialLinks: user.socialLinks,
         skills: user.skills,
         profileImage: user.profileImage,
+        isAvailableForWork: user.isAvailableForWork,
       },
     });
   } catch (error) {

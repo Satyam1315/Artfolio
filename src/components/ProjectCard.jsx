@@ -1,17 +1,27 @@
 import { Link } from "react-router-dom";
+import { Star } from "lucide-react";
 
 const ProjectCard = ({ project }) => {
+  // Use thumbnailIndex if available, fallback to first image
+  const thumbnailUrl = project.images[project.thumbnailIndex || 0]?.url || project.images[0]?.url;
+  
   return (
     <Link
       to={`/project/${project._id}`}
       className="group relative overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-500"
     >
-      <div className="aspect-4/3 overflow-hidden">
+      <div className="aspect-4/3 overflow-hidden relative">
         <img
-          src={project.images[0]?.url}
+          src={thumbnailUrl}
           alt={project.title}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
+        {project.isFeatured && (
+          <div className="absolute top-4 right-4 bg-gray-900 text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 text-sm font-medium shadow-lg">
+            <Star className="w-4 h-4 fill-current" />
+            <span>Featured</span>
+          </div>
+        )}
       </div>
 
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-500 flex items-end">

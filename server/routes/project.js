@@ -29,6 +29,7 @@ router.post("/", authenticate, upload.array("images", 10), async (req, res) => {
       client,
       completionDate,
       isFeatured,
+      thumbnailIndex,
     } = req.body;
 
     if (!req.files || req.files.length === 0) {
@@ -67,6 +68,7 @@ router.post("/", authenticate, upload.array("images", 10), async (req, res) => {
       client,
       completionDate,
       isFeatured,
+      thumbnailIndex: thumbnailIndex ? parseInt(thumbnailIndex) : 0,
     });
 
     await project.save();
@@ -178,6 +180,7 @@ router.put(
         completionDate,
         isFeatured,
         existingImages,
+        thumbnailIndex,
       } = req.body;
 
       let images =
@@ -222,6 +225,7 @@ router.put(
       project.client = client;
       project.completionDate = completionDate;
       project.isFeatured = isFeatured;
+      project.thumbnailIndex = thumbnailIndex ? parseInt(thumbnailIndex) : 0;
 
       await project.save();
       res.json(project);

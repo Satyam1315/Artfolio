@@ -23,8 +23,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.getMe();
       setUser(response.data.user);
+      return response.data.user;
     } catch (error) {
       setUser(null);
+      return null;
     } finally {
       setLoading(false);
     }

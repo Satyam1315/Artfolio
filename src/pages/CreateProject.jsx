@@ -29,6 +29,7 @@ const CreateProject = () => {
   });
   const [images, setImages] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
+  const [thumbnailIndex, setThumbnailIndex] = useState(0);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -62,6 +63,16 @@ const CreateProject = () => {
   };
 
   const removeImage = (index) => {
+    const totalImages = images.length;
+    
+    // If removing the thumbnail image, reset to first image
+    if (index === thumbnailIndex && totalImages > 1) {
+      setThumbnailIndex(0);
+    } else if (index < thumbnailIndex) {
+      // If removing an image before the thumbnail, adjust the index
+      setThumbnailIndex(thumbnailIndex - 1);
+    }
+    
     const newImages = images.filter((_, i) => i !== index);
     const newPreviews = previewUrls.filter((_, i) => i !== index);
     setImages(newImages);
@@ -97,6 +108,7 @@ const CreateProject = () => {
       formDataToSend.append("client", formData.client);
       formDataToSend.append("completionDate", formData.completionDate);
       formDataToSend.append("isFeatured", formData.isFeatured);
+      formDataToSend.append("thumbnailIndex", thumbnailIndex);
 
       images.forEach((image) => {
         formDataToSend.append("images", image);
@@ -145,6 +157,9 @@ const CreateProject = () => {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Project Images (Max 10, 10MB each) *
             </label>
+            <p className="text-sm text-gray-500 mb-3">
+              Select one image as thumbnail by clicking the circle below it
+            </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {previewUrls.map((url, index) => (
@@ -157,12 +172,26 @@ const CreateProject = () => {
                     alt={`Preview ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
+                  {thumbnailIndex === index && (
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-blue-600 text-white text-xs rounded font-medium">
+                      Thumbnail
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={() => removeImage(index)}
                     className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <X className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setThumbnailIndex(index)}
+                    className="absolute bottom-2 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full border-2 border-white bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-colors flex items-center justify-center"
+                  >
+                    {thumbnailIndex === index && (
+                      <div className="w-3 h-3 rounded-full bg-blue-600" />
+                    )}
                   </button>
                 </div>
               ))}

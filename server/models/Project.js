@@ -29,6 +29,11 @@ const projectSchema = new mongoose.Schema(
         },
       },
     ],
+    thumbnailIndex: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     category: {
       type: String,
       required: true,

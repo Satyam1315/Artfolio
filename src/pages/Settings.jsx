@@ -19,7 +19,6 @@ const Settings = () => {
     profession: "",
     location: "",
     skills: "",
-    isAvailableForWork: true,
     socialLinks: {
       website: "",
       instagram: "",
@@ -38,7 +37,6 @@ const Settings = () => {
         profession: user.profession || "",
         location: user.location || "",
         skills: user.skills?.join(", ") || "",
-        isAvailableForWork: user.isAvailableForWork ?? true,
         socialLinks: {
           website: user.socialLinks?.website || "",
           instagram: user.socialLinks?.instagram || "",
@@ -106,14 +104,15 @@ const Settings = () => {
           .split(",")
           .map((s) => s.trim())
           .filter((s) => s),
-        isAvailableForWork: formData.isAvailableForWork,
         socialLinks: formData.socialLinks,
       };
 
       await userAPI.updateProfile(dataToSend);
       await checkAuth();
       setSuccess("Profile updated successfully");
-      setTimeout(() => setSuccess(""), 3000);
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update profile");
     } finally {
@@ -283,21 +282,6 @@ const Settings = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                 placeholder="Photoshop, Illustrator, Figma"
               />
-            </div>
-
-            <div className="flex items-center">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="isAvailableForWork"
-                  checked={formData.isAvailableForWork}
-                  onChange={handleChange}
-                  className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
-                />
-                <span className="text-sm font-medium text-gray-700">
-                  Available for work
-                </span>
-              </label>
             </div>
           </div>
 
