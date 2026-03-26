@@ -8,10 +8,10 @@ export const welcomeEmailTemplate = (userName) => {
     <title>Welcome to Artist Portfolio</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #0a0a0a;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0a0a0a; padding: 40px 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #0a0a0a; padding: 40px 20px; min-width: 100%;">
         <tr>
             <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
                     
                     <!-- Header with artistic pattern -->
                     <tr>
@@ -169,10 +169,10 @@ export const resetPasswordEmailTemplate = (userName, resetLink) => {
     <title>Reset Your Password</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #0a0a0a;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0a0a0a; padding: 40px 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #0a0a0a; padding: 40px 20px; min-width: 100%;">
         <tr>
             <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
                     
                     <!-- Header with lock icon pattern -->
                     <tr>
@@ -313,6 +313,153 @@ export const resetPasswordEmailTemplate = (userName, resetLink) => {
                             </p>
                             <p style="margin: 0 0 20px 0; color: #9ca3af; font-size: 13px;">
                                 You can safely ignore this email. Your password will remain unchanged.
+                            </p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                                © 2025 Artist Portfolio. All rights reserved.
+                            </p>
+                            <p style="margin: 10px 0 0 0; color: #cbd5e0; font-size: 11px;">
+                                This is an automated message, please do not reply.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+  `;
+};
+
+export const passwordResetSuccessEmailTemplate = (userName) => {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset Successful</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #0a0a0a;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #0a0a0a; padding: 40px 20px; min-width: 100%;">
+        <tr>
+            <td align="center">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                    
+                    <!-- Header with success icon -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%); padding: 70px 40px; text-align: center; position: relative;">
+                            <div style="background-image: url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.08\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E'); position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.3;"></div>
+                            <div style="background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.15), transparent 70%); position: absolute; top: 0; left: 0; right: 0; bottom: 0;"></div>
+                            <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1)); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 50px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); position: relative; z-index: 1; line-height: 80px; text-align: center;">✅</div>
+                            <h1 style="margin: 0; color: #ffffff; font-size: 40px; font-weight: 800; letter-spacing: -1.5px; position: relative; z-index: 1; text-shadow: 0 2px 30px rgba(0,0,0,0.3);">
+                                Password Reset Successful
+                            </h1>
+                            <p style="margin: 15px 0 0 0; color: rgba(255,255,255,0.95); font-size: 16px; position: relative; z-index: 1; text-shadow: 0 1px 10px rgba(0,0,0,0.2);">
+                                Your account is now secure
+                            </p>
+                            <div style="margin-top: 25px; height: 5px; width: 100px; background: linear-gradient(90deg, rgba(255,255,255,0.7), rgba(255,255,255,0.2)); margin-left: auto; margin-right: auto; border-radius: 10px; box-shadow: 0 2px 15px rgba(255,255,255,0.3);"></div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 50px 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 25px;">
+                                <tr>
+                                    <td style="padding: 25px; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 12px; border-left: 5px solid #10b981;">
+                                        <h2 style="margin: 0 0 12px 0; color: #064e3b; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+                                            Hello ${userName},
+                                        </h2>
+                                        <p style="margin: 0; color: #065f46; font-size: 16px; line-height: 1.8; font-weight: 500;">
+                                            Your password has been successfully reset!
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 0 0 25px 0; color: #374151; font-size: 16px; line-height: 1.8;">
+                                This is a confirmation that the password for your Artist Portfolio account has just been changed. You can now log in with your new password.
+                            </p>
+                            
+                            <!-- Success message box -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin: 35px 0;">
+                                <tr>
+                                    <td style="padding: 25px 28px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-left: 5px solid #10b981; border-radius: 12px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);">
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="50" align="center" valign="middle" style="padding-right: 20px;">
+                                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); font-size: 24px; line-height: 50px; text-align: center;">
+                                                        🔒
+                                                    </div>
+                                                </td>
+                                                <td valign="middle">
+                                                    <h3 style="margin: 0 0 10px 0; color: #064e3b; font-size: 19px; font-weight: 700; letter-spacing: -0.3px;">
+                                                        Your Account is Secure
+                                                    </h3>
+                                                    <p style="margin: 0; color: #065f46; font-size: 15px; line-height: 1.7;">
+                                                        You can now access your account with your new password.
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- CTA Button -->
+                            <table cellpadding="0" cellspacing="0" style="margin: 35px auto;">
+                                <tr>
+                                    <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 18px 50px; text-align: center; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);">
+                                        <a href="${process.env.CLIENT_URL}/login" style="color: #ffffff; text-decoration: none; font-size: 17px; font-weight: 700; letter-spacing: 0.3px; text-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+                                            Login to Your Account →
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Security notice -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin: 40px 0 0 0;">
+                                <tr>
+                                    <td style="padding: 28px 30px; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; border-left: 5px solid #ef4444; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1);">
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="50" align="center" valign="middle" style="padding-right: 20px;">
+                                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 12px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); font-size: 24px; line-height: 50px; text-align: center;">
+                                                        ⚠️
+                                                    </div>
+                                                </td>
+                                                <td valign="middle">
+                                                    <h3 style="margin: 0 0 15px 0; color: #7f1d1d; font-size: 18px; font-weight: 700; letter-spacing: -0.3px;">
+                                                        Didn't Make This Change?
+                                                    </h3>
+                                                    <p style="margin: 0; color: #991b1b; font-size: 15px; line-height: 1.9;">
+                                                        If you didn't change your password, please <strong>contact our support team immediately</strong> as your account may have been compromised. We recommend updating your password and enabling additional security measures.
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Decorative divider -->
+                    <tr>
+                        <td style="padding: 0 40px;">
+                            <div style="height: 2px; background: linear-gradient(90deg, transparent, #e5e7eb, transparent);"></div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 40px; text-align: center; background-color: #f9fafb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
+                                Thank you for using Artist Portfolio!
+                            </p>
+                            <p style="margin: 0 0 20px 0; color: #9ca3af; font-size: 13px;">
+                                Questions? Our support team is here to help.
                             </p>
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
                                 © 2025 Artist Portfolio. All rights reserved.

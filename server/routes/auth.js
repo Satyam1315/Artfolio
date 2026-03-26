@@ -5,6 +5,7 @@ import User from "../models/User.js";
 import {
   sendWelcomeEmail,
   sendPasswordResetEmail,
+  sendPasswordResetSuccessEmail,
 } from "../utils/emailService.js";
 
 const router = express.Router();
@@ -28,7 +29,7 @@ router.post("/register", async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -70,7 +71,7 @@ router.post("/login", async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -185,6 +186,10 @@ router.post("/reset-password/:token", async (req, res) => {
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
     await user.save();
+
+    sendPasswordResetSuccessEmail(user.email, user.name).catch((err) =>
+      console.error("Failed to send password reset success email:", err)
+    );
 
     res.json({
       message: "Password has been reset successfully",

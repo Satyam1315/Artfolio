@@ -12,6 +12,9 @@ const Dashboard = () => {
   const [copied, setCopied] = useState(false);
   const [togglingWork, setTogglingWork] = useState(false);
   const [isAvailable, setIsAvailable] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -34,18 +37,31 @@ const Dashboard = () => {
     }
   };
 
-  const handleDelete = async (projectId) => {
-    if (!window.confirm("Are you sure you want to delete this project?")) {
-      return;
-    }
+  const handleDelete = (projectId) => {
+    setProjectToDelete(projectId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!projectToDelete) return;
 
     try {
-      await projectAPI.deleteProject(projectId);
-      setProjects(projects.filter((p) => p._id !== projectId));
+      setDeleting(true);
+      await projectAPI.deleteProject(projectToDelete);
+      setProjects(projects.filter((p) => p._id !== projectToDelete));
+      setShowDeleteModal(false);
+      setProjectToDelete(null);
     } catch (error) {
       console.error("Error deleting project:", error);
       alert("Failed to delete project");
+    } finally {
+      setDeleting(false);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setProjectToDelete(null);
   };
 
   const handleShareProfile = async () => {
@@ -197,14 +213,18 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project) => (
+              {projects.map((project) => {
+                // Use thumbnailIndex if available, fallback to first image
+                const thumbnailUrl = project.images[project.thumbnailIndex || 0]?.url || project.images[0]?.url;
+                
+                return (
                 <div
                   key={project._id}
                   className="group bg-white rounded-2xl overflow-hidden border border-gray-200 hover:shadow-lg transition-all"
                 >
                   <div className="aspect-video overflow-hidden">
                     <img
-                      src={project.images[0]?.url}
+                      src={thumbnailUrl}
                       alt={project.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
@@ -234,11 +254,53 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Delete Project?
+              </h3>
+            </div>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this project? This action cannot be undone and all project data will be permanently removed.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={cancelDelete}
+                disabled={deleting}
+                className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 hover:cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleting}
+                className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:cursor-pointer"
+              >
+                {deleting ? (
+                  "Deleting..."
+                ) : (
+                  <>
+                    <Trash2 className="w-5 h-5" />
+                    Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

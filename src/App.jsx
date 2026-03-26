@@ -20,12 +20,14 @@ import CookiePolicy from "./pages/CookiePolicy";
 import License from "./pages/License";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollToTop from "./components/ScrollToTop";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
     <Router>
       <AuthProvider>
+        <ScrollToTop />
         <div className="min-h-screen bg-white">
           <Navbar />
           <Routes>

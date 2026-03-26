@@ -2,6 +2,7 @@ import { getMailjetClient } from "../config/email.js";
 import {
   welcomeEmailTemplate,
   resetPasswordEmailTemplate,
+  passwordResetSuccessEmailTemplate,
 } from "./emailTemplates.js";
 
 export const sendWelcomeEmail = async (userEmail, userName) => {
@@ -48,6 +49,28 @@ export const sendPasswordResetEmail = async (
     return { success: true, messageId: result.body.Sent[0]?.MessageID };
   } catch (error) {
     console.error("❌ Error sending password reset email:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+export const sendPasswordResetSuccessEmail = async (userEmail, userName) => {
+  try {
+    const mailjet = getMailjetClient();
+    
+    const request = mailjet.post('send', { version: 'v3' }).request({
+      FromEmail: process.env.SENDER_EMAIL || "satyamkumarsingh1315@gmail.com",
+      FromName: "Artist Portfolio Security",
+      Subject: "✅ Your Password Has Been Reset - Artist Portfolio",
+      "Html-part": passwordResetSuccessEmailTemplate(userName),
+      Recipients: [{ Email: userEmail }],
+    });
+
+    const result = await request;
+    console.log(`✅ Password reset success email sent to ${userEmail}`);
+    console.log(`📧 Message ID: ${result.body.Sent[0]?.MessageID}`);
+    return { success: true, messageId: result.body.Sent[0]?.MessageID };
+  } catch (error) {
+    console.error("❌ Error sending password reset success email:", error.message);
     return { success: false, error: error.message };
   }
 };
