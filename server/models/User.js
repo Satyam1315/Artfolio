@@ -26,8 +26,14 @@ const userSchema = new mongoose.Schema(
       maxlength: 500,
     },
     profileImage: {
-      type: String,
-      default: "",
+      url: {
+        type: String,
+        default: "",
+      },
+      publicId: {
+        type: String,
+        default: "",
+      },
     },
     skills: [
       {

@@ -13,6 +13,7 @@ const Settings = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     bio: "",
@@ -51,8 +52,10 @@ const Settings = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     if (name.startsWith("social-")) {
       const socialKey = name.replace("social-", "");
+
       setFormData({
         ...formData,
         socialLinks: {
@@ -70,6 +73,7 @@ const Settings = () => {
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
+
     if (!file) return;
 
     const formDataToSend = new FormData();
@@ -77,19 +81,29 @@ const Settings = () => {
 
     try {
       setLoading(true);
+      setError("");
+
       await userAPI.uploadProfileImage(formDataToSend);
       await checkAuth();
+
       setSuccess("Profile image updated successfully");
+
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to upload image");
+      setError(
+        err.response?.data?.message || "Failed to upload image"
+      );
     } finally {
       setLoading(false);
+
+      // Allow selecting the same file again
+      e.target.value = "";
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setLoading(true);
     setError("");
     setSuccess("");
@@ -109,12 +123,16 @@ const Settings = () => {
 
       await userAPI.updateProfile(dataToSend);
       await checkAuth();
+
       setSuccess("Profile updated successfully");
+
       setTimeout(() => {
         navigate("/dashboard");
       }, 1500);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update profile");
+      setError(
+        err.response?.data?.message || "Failed to update profile"
+      );
     } finally {
       setLoading(false);
     }
@@ -134,7 +152,9 @@ const Settings = () => {
       await logout();
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to delete account");
+      setError(
+        err.response?.data?.message || "Failed to delete account"
+      );
       setDeleting(false);
     }
   };
@@ -154,14 +174,20 @@ const Settings = () => {
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
-            <p className="text-red-800 text-sm">{error}</p>
+
+            <p className="text-red-800 text-sm">
+              {error}
+            </p>
           </div>
         )}
 
         {success && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
             <Check className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
-            <p className="text-green-800 text-sm">{success}</p>
+
+            <p className="text-green-800 text-sm">
+              {success}
+            </p>
           </div>
         )}
 
@@ -173,9 +199,9 @@ const Settings = () => {
           <div className="flex items-center gap-6">
             <div className="relative">
               <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200">
-                {user?.profileImage ? (
+                {user?.profileImage?.url ? (
                   <img
-                    src={user.profileImage}
+                    src={user.profileImage.url}
                     alt={user.name}
                     className="w-full h-full object-cover"
                   />
@@ -192,6 +218,7 @@ const Settings = () => {
                   accept="image/*"
                   onChange={handleImageUpload}
                   className="hidden"
+                  disabled={loading}
                 />
               </label>
             </div>
@@ -430,7 +457,9 @@ const Settings = () => {
                 </button>
                 <button
                   onClick={handleDeleteAccount}
-                  disabled={deleting || deleteConfirmText !== "DELETE"}
+                  disabled={
+                    deleting || deleteConfirmText !== "DELETE"
+                  }
                   className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {deleting ? (

@@ -11,12 +11,27 @@ const upload = multer({ storage: multer.memoryStorage() });
 router.get("/:userId", async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).select("-password");
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+
+    // Convert Mongoose document to a plain object
+    const userData = user.toObject();
+
+    // Support old users whose profileImage is still stored as a string
+    if (typeof userData.profileImage === "string") {
+      userData.profileImage = {
+        url: userData.profileImage,
+        publicId: "",
+      };
+    }
+
+    res.json(userData);
+  } catch {
+    res.status(500).json({
+      message: "Server error",
+    });
   }
 });
 
@@ -62,12 +77,25 @@ router.post(
         return res.status(400).json({ message: "No image provided" });
       }
 
+      const user = await User.findById(req.userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const oldPublicId = user.profileImage?.publicId;
+
       const result = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
             folder: "artist-portfolio/profiles",
             transformation: [
-              { width: 500, height: 500, crop: "fill", gravity: "face" },
+              {
+                width: 500,
+                height: 500,
+                crop: "fill",
+                gravity: "face",
+              },
             ],
           },
           (error, result) => {
@@ -75,18 +103,38 @@ router.post(
             else resolve(result);
           }
         );
+
         uploadStream.end(req.file.buffer);
       });
 
-      const user = await User.findByIdAndUpdate(
-        req.userId,
-        { profileImage: result.secure_url },
-        { new: true }
-      ).select("-password");
+      user.profileImage = {
+        url: result.secure_url,
+        publicId: result.public_id,
+      };
 
-      res.json({ profileImage: user.profileImage });
+      await user.save();
+
+      // Delete the old profile image after the new image is saved
+      if (oldPublicId) {
+        try {
+          await cloudinary.uploader.destroy(oldPublicId);
+        } catch (cloudinaryError) {
+          console.error(
+            "Failed to delete old profile image:",
+            cloudinaryError
+          );
+        }
+      }
+
+      res.json({
+        profileImage: user.profileImage,
+      });
     } catch (error) {
-      res.status(500).json({ message: "Server error", error: error.message });
+      console.error("Profile image upload error:", error);
+
+      res.status(500).json({
+        message: "Server error",
+      });
     }
   }
 );
@@ -109,10 +157,9 @@ router.delete("/profile", authenticate, async (req, res) => {
     await Project.deleteMany({ user: userId });
 
     const user = await User.findById(userId);
-    if (user.profileImage) {
+    if (user.profileImage?.publicId) {
       try {
-        const publicId = user.profileImage.split('/').pop().split('.')[0];
-        await cloudinary.uploader.destroy(`artist-portfolio/profiles/${publicId}`);
+        await cloudinary.uploader.destroy(user.profileImage.publicId);
       } catch (err) {
         console.error("Error deleting profile image:", err);
       }

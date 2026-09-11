@@ -18,17 +18,16 @@ const ProjectDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-
-  const fetchProject = async () => {
-    try {
-      const response = await projectAPI.getProject(projectId);
-      setProject(response.data);
-    } catch (error) {
-      console.error("Error fetching project:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchProject = async () => {
+      try {
+        const response = await projectAPI.getProject(projectId);
+        setProject(response.data);
+      } catch (error) {
+        console.error("Error fetching project:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchProject();
   }, [projectId]);
@@ -86,7 +85,9 @@ const ProjectDetail = () => {
               <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-100 mb-4">
                 <img
                   src={project.images[currentImageIndex]?.url}
-                  alt={`${project.title} - Image ${currentImageIndex + 1}`}
+                  alt={`${project.title} - Image ${
+                    currentImageIndex + 1
+                  }`}
                   className="w-full h-full object-cover"
                 />
 
@@ -156,9 +157,9 @@ const ProjectDetail = () => {
                 to={`/profile/${project.user._id}`}
                 className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
               >
-                {project.user.profileImage ? (
+                {project.user.profileImage?.url ? (
                   <img
-                    src={project.user.profileImage}
+                    src={project.user.profileImage.url}
                     alt={project.user.name}
                     className="w-14 h-14 rounded-full object-cover"
                   />
@@ -225,7 +226,9 @@ const ProjectDetail = () => {
                     <span className="text-sm">
                       Completed:{" "}
                       <strong>
-                        {new Date(project.completionDate).toLocaleDateString()}
+                        {new Date(
+                          project.completionDate
+                        ).toLocaleDateString()}
                       </strong>
                     </span>
                   </div>

@@ -21,21 +21,21 @@ const Profile = () => {
   const [activeFilter, setActiveFilter] = useState("all");
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [userResponse, projectsResponse] = await Promise.all([
+          userAPI.getUser(userId),
+          projectAPI.getUserProjects(userId),
+        ]);
 
-  const fetchData = async () => {
-    try {
-      const [userResponse, projectsResponse] = await Promise.all([
-        userAPI.getUser(userId),
-        projectAPI.getUserProjects(userId),
-      ]);
-      setUser(userResponse.data);
-      setProjects(projectsResponse.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setUser(userResponse.data);
+        setProjects(projectsResponse.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchData();
   }, [userId]);
@@ -71,9 +71,9 @@ const Profile = () => {
           <div className="flex flex-col md:flex-row gap-8 items-start">
             {/* Profile Image */}
             <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 shrink-0 ring-4 ring-white shadow-xl">
-              {user.profileImage ? (
+              {user.profileImage?.url ? (
                 <img
-                  src={user.profileImage}
+                  src={user.profileImage.url}
                   alt={user.name}
                   className="w-full h-full object-cover"
                 />

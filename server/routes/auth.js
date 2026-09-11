@@ -108,24 +108,33 @@ router.get("/me", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const userData = user.toObject();
+
+    // Support old users whose profileImage is still stored as a string
+    if (typeof userData.profileImage === "string") {
+      userData.profileImage = {
+        url: userData.profileImage,
+        publicId: "",
+      };
+    }
+
     res.json({
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        bio: user.bio,
-        location: user.location,
-        profession: user.profession,
-        website: user.website,
-        socialLinks: user.socialLinks,
-        skills: user.skills,
-        profileImage: user.profileImage,
-        isAvailableForWork: user.isAvailableForWork,
+        id: userData._id,
+        name: userData.name,
+        email: userData.email,
+        bio: userData.bio,
+        location: userData.location,
+        profession: userData.profession,
+        socialLinks: userData.socialLinks,
+        skills: userData.skills,
+        profileImage: userData.profileImage,
+        isAvailableForWork: userData.isAvailableForWork,
       },
     });
   } catch {
     res.status(401).json({ message: "Invalid token" });
-}
+  }
 });
 
 router.post("/forgot-password", async (req, res) => {

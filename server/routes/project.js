@@ -201,13 +201,15 @@ router.put(
               },
               (error, result) => {
                 if (error) reject(error);
-                else
+                else {
                   resolve({
                     url: result.secure_url,
                     publicId: result.public_id,
                   });
+                }
               }
             );
+
             uploadStream.end(file.buffer);
           });
         });
@@ -216,21 +218,56 @@ router.put(
         images = [...images, ...newImages];
       }
 
+      // Delete images that were removed from the project
+      const oldPublicIds = new Set(
+        project.images
+          .map((image) => image.publicId)
+          .filter(Boolean)
+      );
+
+      const newPublicIds = new Set(
+        images
+          .map((image) => image.publicId)
+          .filter(Boolean)
+      );
+
+      const removedPublicIds = [...oldPublicIds].filter(
+        (publicId) => !newPublicIds.has(publicId)
+      );
+
+      for (const publicId of removedPublicIds) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (cloudinaryError) {
+          console.error(
+            `Failed to delete Cloudinary image ${publicId}:`,
+            cloudinaryError
+          );
+        }
+      }
+
       project.title = title;
       project.description = description;
       project.images = images;
       project.category = category;
-      project.tags = typeof tags === "string" ? JSON.parse(tags) : tags;
+      project.tags =
+        typeof tags === "string" ? JSON.parse(tags) : tags;
       project.projectUrl = projectUrl;
       project.client = client;
       project.completionDate = completionDate;
       project.isFeatured = isFeatured;
-      project.thumbnailIndex = thumbnailIndex ? parseInt(thumbnailIndex) : 0;
+      project.thumbnailIndex = thumbnailIndex
+        ? parseInt(thumbnailIndex)
+        : 0;
 
       await project.save();
+
       res.json(project);
     } catch (error) {
-      res.status(500).json({ message: "Server error", error: error.message });
+      res.status(500).json({
+        message: "Server error",
+        error: error.message,
+      });
     }
   }
 );
