@@ -18,8 +18,6 @@ const ProjectDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    fetchProject();
-  }, [projectId]);
 
   const fetchProject = async () => {
     try {
@@ -31,6 +29,9 @@ const ProjectDetail = () => {
       setLoading(false);
     }
   };
+
+    fetchProject();
+  }, [projectId]);
 
   const nextImage = () => {
     setCurrentImageIndex((prev) =>

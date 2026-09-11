@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { userAPI } from "../utils/api";
 import { Camera, AlertCircle, Check, Trash2 } from "lucide-react";
 

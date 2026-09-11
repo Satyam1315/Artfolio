@@ -36,10 +36,7 @@ const EditProject = () => {
   const [thumbnailIndex, setThumbnailIndex] = useState(0);
 
   useEffect(() => {
-    fetchProject();
-  }, [projectId]);
-
-  const fetchProject = async () => {
+    const fetchProject = async () => {
     try {
       const response = await projectAPI.getProject(projectId);
       const project = response.data;
@@ -66,6 +63,9 @@ const EditProject = () => {
       setLoading(false);
     }
   };
+
+    fetchProject();
+  }, [projectId]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -462,3 +462,5 @@ const EditProject = () => {
 };
 
 export default EditProject;
+
+

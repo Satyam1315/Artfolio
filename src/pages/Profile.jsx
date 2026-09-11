@@ -21,8 +21,6 @@ const Profile = () => {
   const [activeFilter, setActiveFilter] = useState("all");
 
   useEffect(() => {
-    fetchData();
-  }, [userId]);
 
   const fetchData = async () => {
     try {
@@ -38,6 +36,9 @@ const Profile = () => {
       setLoading(false);
     }
   };
+
+    fetchData();
+  }, [userId]);
 
   const filteredProjects =
     activeFilter === "all"

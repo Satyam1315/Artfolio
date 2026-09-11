@@ -123,9 +123,9 @@ router.get("/me", async (req, res) => {
         isAvailableForWork: user.isAvailableForWork,
       },
     });
-  } catch (error) {
+  } catch {
     res.status(401).json({ message: "Invalid token" });
-  }
+}
 });
 
 router.post("/forgot-password", async (req, res) => {

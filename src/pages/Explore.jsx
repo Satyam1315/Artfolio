@@ -23,8 +23,6 @@ const Explore = () => {
 
   // Fetch projects only when category changes
   useEffect(() => {
-    fetchProjects();
-  }, [activeCategory]);
 
   const fetchProjects = async () => {
     try {
@@ -41,6 +39,9 @@ const Explore = () => {
       setLoading(false);
     }
   };
+
+    fetchProjects();
+  }, [activeCategory]);
 
   // Client-side filtering using useMemo for performance
   const filteredProjects = useMemo(() => {

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Menu, X, User, LogOut, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
