@@ -1,14 +1,21 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Search, Filter } from "lucide-react";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ProjectCard from "../components/ProjectCard";
 import { projectAPI } from "../utils/api";
 
 const Explore = () => {
-  const [allProjects, setAllProjects] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalProjects, setTotalProjects] = useState(0);
 
   const categories = [
     { value: "all", label: "All" },
@@ -21,51 +28,81 @@ const Explore = () => {
     { value: "other", label: "Other" },
   ];
 
-  // Fetch projects only when category changes
-  useEffect(() => {
-
+  // Fetch the first page of projects
   const fetchProjects = async () => {
     try {
       setLoading(true);
+
       const params = {
         category: activeCategory,
+        search: searchQuery.trim(),
+        page: 1,
+        limit: 12,
       };
+
       const response = await projectAPI.getAllProjects(params);
-      setAllProjects(response.data);
+
+      setProjects(response.data.projects);
+      setPage(response.data.pagination.page);
+      setHasMore(response.data.pagination.hasMore);
+      setTotalProjects(response.data.pagination.total);
     } catch (error) {
       console.error("Error fetching projects:", error);
-      setAllProjects([]);
+
+      setProjects([]);
+      setPage(1);
+      setHasMore(false);
+      setTotalProjects(0);
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
 
-    fetchProjects();
-  }, [activeCategory]);
+  // Fetch page 1 whenever category or search changes
+  // Debounce search requests by 400ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchProjects();
+    }, 400);
 
-  // Client-side filtering using useMemo for performance
-  const filteredProjects = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return allProjects;
+    return () => clearTimeout(timer);
+  }, [activeCategory, searchQuery]);
+
+  // Load the next page and append it to the existing projects
+  const loadMoreProjects = async () => {
+    if (!hasMore || loadingMore) return;
+
+    try {
+      setLoadingMore(true);
+
+      const nextPage = page + 1;
+
+      const params = {
+        category: activeCategory,
+        search: searchQuery.trim(),
+        page: nextPage,
+        limit: 12,
+      };
+
+      const response = await projectAPI.getAllProjects(params);
+
+      setProjects((prevProjects) => [
+        ...prevProjects,
+        ...response.data.projects,
+      ]);
+
+      setPage(response.data.pagination.page);
+      setHasMore(response.data.pagination.hasMore);
+    } catch (error) {
+      console.error("Error loading more projects:", error);
+    } finally {
+      setLoadingMore(false);
     }
+  };
 
-    const searchLower = searchQuery.toLowerCase();
-    return allProjects.filter((project) => {
-      const titleMatch = project.title.toLowerCase().includes(searchLower);
-      const descMatch = project.description.toLowerCase().includes(searchLower);
-      const userNameMatch = project.user?.name?.toLowerCase().includes(searchLower);
-      const skillsMatch = project.user?.skills?.some((skill) =>
-        skill.toLowerCase().includes(searchLower)
-      );
-      const tagsMatch = project.tags?.some((tag) =>
-        tag.toLowerCase().includes(searchLower)
-      );
-
-      return titleMatch || descMatch || userNameMatch || skillsMatch || tagsMatch;
-    });
-  }, [allProjects, searchQuery]);
-
-  if (loading) {
+  // Show full-page loader only during the first request
+  if (initialLoading) {
     return (
       <div className="min-h-screen pt-24 flex items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -81,6 +118,7 @@ const Explore = () => {
           <h1 className="text-5xl font-bold text-gray-900 mb-4">
             Explore Creative Work
           </h1>
+
           <p className="text-xl text-gray-600">
             Discover amazing portfolios from talented artists around the world
           </p>
@@ -90,6 +128,7 @@ const Explore = () => {
         <div className="mb-8 max-w-2xl mx-auto">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+
             <input
               type="text"
               value={searchQuery}
@@ -98,6 +137,7 @@ const Explore = () => {
               className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-full focus:ring-2 focus:ring-gray-900 focus:border-transparent text-lg"
             />
           </div>
+
           {searchQuery && (
             <p className="text-sm text-gray-500 mt-2 text-center">
               Searching projects, artists, skills, and tags
@@ -123,15 +163,20 @@ const Explore = () => {
         </div>
 
         {/* Results Count */}
-        {filteredProjects.length > 0 && (
+        {totalProjects > 0 && (
           <div className="mb-6 text-center">
             <p className="text-gray-600">
-              Found <span className="font-semibold">{filteredProjects.length}</span>{" "}
-              {filteredProjects.length === 1 ? "project" : "projects"}
+              Found{" "}
+              <span className="font-semibold">{totalProjects}</span>{" "}
+              {totalProjects === 1 ? "project" : "projects"}
+
               {searchQuery && (
                 <span>
                   {" "}
-                  matching "<span className="font-medium">{searchQuery}</span>"
+                  matching{" "}
+                  <span className="font-medium">
+                    "{searchQuery}"
+                  </span>
                 </span>
               )}
             </p>
@@ -139,28 +184,53 @@ const Explore = () => {
         )}
 
         {/* Projects Grid */}
-        {filteredProjects.length === 0 ? (
+        {loading ? (
+          <div className="py-20 flex justify-center">
+            <LoadingSpinner size="lg" />
+          </div>
+        ) : projects.length === 0 ? (
           <div className="text-center py-20">
             <Filter className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+
             <p className="text-xl text-gray-600 mb-4">
               {searchQuery || activeCategory !== "all"
                 ? "No projects found matching your criteria"
                 : "No projects available yet"}
             </p>
+
             <p className="text-gray-500">
               {searchQuery
                 ? "Try different keywords or browse all categories"
-                : !searchQuery &&
-                  activeCategory === "all" &&
-                  "Check back soon for amazing creative work!"}
+                : activeCategory === "all"
+                  ? "Check back soon for amazing creative work!"
+                  : "Try another category"}
             </p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map((project) => (
-              <ProjectCard key={project._id} project={project} />
-            ))}
-          </div>
+          <>
+            {/* Projects Grid */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map((project) => (
+                <ProjectCard
+                  key={project._id}
+                  project={project}
+                />
+              ))}
+            </div>
+
+            {/* Load More */}
+            {hasMore && (
+              <div className="flex justify-center mt-10">
+                <button
+                  onClick={loadMoreProjects}
+                  disabled={loadingMore}
+                  className="px-8 py-3 rounded-full bg-gray-900 text-white font-medium hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loadingMore ? "Loading..." : "Load More"}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

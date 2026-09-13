@@ -76,7 +76,8 @@ const projectSchema = new mongoose.Schema(
 
 // Index for faster queries
 projectSchema.index({ user: 1, createdAt: -1 });
-projectSchema.index({ category: 1 });
+projectSchema.index({ category: 1, createdAt: -1 });
+projectSchema.index({ tags: 1 });
 
 const Project = mongoose.model("Project", projectSchema);
 

@@ -1,5 +1,6 @@
 import express from "express";
 import Project from "../models/Project.js";
+import User from "../models/User.js";
 import { authenticate } from "../middleware/auth.js";
 import cloudinary from "../config/cloudinary.js";
 import upload from "../middleware/upload.js";
@@ -81,47 +82,72 @@ router.post("/", authenticate, upload.array("images", 10), async (req, res) => {
 router.get("/explore", async (req, res) => {
   try {
     const { search, category } = req.query;
-    let query = {};
 
+    // Pagination
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit) || 12, 50);
+    const skip = (page - 1) * limit;
+
+    const query = {};
+
+    // Category filter
     if (category && category !== "all") {
       query.category = category;
     }
 
-    let projects = await Project.find(query)
-      .sort({ createdAt: -1 })
-      .populate("user", "name profileImage profession skills")
-      .limit(100);
-
+    // Search projects and artists
     if (search && search.trim()) {
-      const searchLower = search.toLowerCase();
-      projects = projects.filter((project) => {
-        const titleMatch = project.title.toLowerCase().includes(searchLower);
-        const descMatch = project.description
-          .toLowerCase()
-          .includes(searchLower);
-        const userNameMatch = project.user?.name
-          .toLowerCase()
-          .includes(searchLower);
-        const skillsMatch = project.user?.skills?.some((skill) =>
-          skill.toLowerCase().includes(searchLower)
-        );
-        const tagsMatch = project.tags?.some((tag) =>
-          tag.toLowerCase().includes(searchLower)
-        );
+      const searchRegex = new RegExp(search.trim(), "i");
 
-        return (
-          titleMatch ||
-          descMatch ||
-          userNameMatch ||
-          skillsMatch ||
-          tagsMatch
-        );
-      });
+      // Find artists whose name or skills match
+      const matchingUsers = await User.find({
+        $or: [
+          { name: searchRegex },
+          { skills: searchRegex },
+        ],
+      }).select("_id");
+
+      const matchingUserIds = matchingUsers.map((user) => user._id);
+
+      query.$or = [
+        // Project fields
+        { title: searchRegex },
+        { description: searchRegex },
+        { tags: searchRegex },
+
+        // Artist fields
+        { user: { $in: matchingUserIds } },
+      ];
     }
 
-    res.json(projects);
+    // Get total matching projects
+    const total = await Project.countDocuments(query);
+
+    // Get only the projects for this page
+    const projects = await Project.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("user", "name profileImage profession skills");
+
+    res.set("Cache-Control", "no-store");
+
+    res.json({
+      projects,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasMore: page < Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Explore projects error:", error);
+
+    res.status(500).json({
+      message: "Server error",
+    });
   }
 });
 
