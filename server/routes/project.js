@@ -2,10 +2,9 @@ import express from "express";
 import Project from "../models/Project.js";
 import { authenticate } from "../middleware/auth.js";
 import cloudinary from "../config/cloudinary.js";
-import multer from "multer";
+import upload from "../middleware/upload.js";
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
 
 router.get("/", authenticate, async (req, res) => {
   try {
@@ -141,7 +140,7 @@ router.get("/:projectId", async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId).populate(
       "user",
-      "name profileImage profession email"
+      "name profileImage profession"
     );
 
     if (!project) {
@@ -284,9 +283,10 @@ router.delete("/:projectId", authenticate, async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    const deletePromises = project.images.map((image) =>
-      cloudinary.uploader.destroy(image.publicId)
-    );
+    const deletePromises = project.images
+      .filter((image) => image.publicId)
+      .map((image) => cloudinary.uploader.destroy(image.publicId));
+
     await Promise.all(deletePromises);
 
     await Project.findByIdAndDelete(req.params.projectId);

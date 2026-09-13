@@ -11,6 +11,7 @@ import userRoutes from "./routes/user.js";
 import projectRoutes from "./routes/project.js";
 import { verifyCloudinaryConnection } from "./config/cloudinary.js";
 import { verifyEmailConnection } from "./config/email.js";
+import multer from "multer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -34,6 +35,40 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/projects", projectRoutes);
+
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        message: "Each image must be smaller than 10 MB.",
+      });
+    }
+
+    if (err.code === "LIMIT_FILE_COUNT") {
+      return res.status(400).json({
+        message: "You can upload a maximum of 10 images.",
+      });
+    }
+
+    if (err.code === "LIMIT_UNEXPECTED_FILE") {
+      return res.status(400).json({
+        message: "Too many files were uploaded.",
+      });
+    }
+
+    return res.status(400).json({
+      message: "File upload failed.",
+    });
+  }
+
+  if (err) {
+    return res.status(400).json({
+      message: err.message || "Something went wrong.",
+    });
+  }
+
+  next();
+});
 
 mongoose
   .connect(process.env.MONGODB_URI)

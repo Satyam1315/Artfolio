@@ -3,14 +3,15 @@ import User from "../models/User.js";
 import Project from "../models/Project.js";
 import { authenticate } from "../middleware/auth.js";
 import cloudinary from "../config/cloudinary.js";
-import multer from "multer";
+import upload from "../middleware/upload.js";
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
 
 router.get("/:userId", async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId).select("-password");
+    const user = await User.findById(req.params.userId).select(
+      "name profileImage profession bio skills socialLinks location isAvailableForWork"
+    );
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -59,7 +60,9 @@ router.put("/profile", authenticate, async (req, res) => {
     const user = await User.findByIdAndUpdate(req.userId, updateData, {
       new: true,
       runValidators: true,
-    }).select("-password");
+    }).select(
+      "name email profileImage profession bio skills socialLinks location isAvailableForWork"
+    );
 
     res.json(user);
   } catch (error) {
@@ -146,11 +149,13 @@ router.delete("/profile", authenticate, async (req, res) => {
     const projects = await Project.find({ user: userId });
 
     for (const project of projects) {
-      const deletePromises = project.images.map((image) =>
-        cloudinary.uploader.destroy(image.publicId).catch((err) => {
-          console.error("Error deleting image:", err);
-        })
-      );
+      const deletePromises = project.images
+        .filter((image) => image.publicId)
+        .map((image) =>
+          cloudinary.uploader.destroy(image.publicId).catch((err) => {
+            console.error("Error deleting image:", err);
+          })
+        );
       await Promise.all(deletePromises);
     }
 
